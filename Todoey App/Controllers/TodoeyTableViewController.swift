@@ -17,7 +17,10 @@ class TodoeyTableViewController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         //print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true))
-        itemArray = defaults.array(forKey: "TodoeyListArray") as! [String]
+        //Prevent app from crashing if key "TodoeyListArray" does not exist
+        if let items = defaults.array(forKey: "TodoeyListArray") as? [String] {
+            itemArray = items
+        }
     }
 
     override func didReceiveMemoryWarning() {
