@@ -10,17 +10,12 @@ import UIKit
 
 class TodoeyTableViewController: UITableViewController {
 
-    var itemArray = [String]()
-    var defaults = UserDefaults.standard
-    
+    var itemArray = [Item]()
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        //print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true))
-        //Prevent app from crashing if key "TodoeyListArray" does not exist
-        if let items = defaults.array(forKey: "TodoeyListArray") as? [String] {
-            itemArray = items
-        }
+        loadItems()
     }
 
     override func didReceiveMemoryWarning() {
@@ -31,7 +26,7 @@ class TodoeyTableViewController: UITableViewController {
     //MARK: - TableView Data source methods
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "labelCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]
+        cell.textLabel?.text = itemArray[indexPath.row].title
         return cell
     }
 
@@ -39,6 +34,7 @@ class TodoeyTableViewController: UITableViewController {
         return itemArray.count
     }
 
+    //MARK:- Add Button Action
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         var textfield = UITextField()
         let alert = UIAlertController(title: "Add Item", message: "What do you want to add?", preferredStyle: .alert)
@@ -49,14 +45,42 @@ class TodoeyTableViewController: UITableViewController {
         }
         
         let action = UIAlertAction(title: "Add", style: .default) { (alertAction) in
-            self.itemArray.append(textfield.text!)
-            self.defaults.set(self.itemArray, forKey: "TodoeyListArray")
-            self.tableView.reloadData()
+            let item = Item()
+            item.title = textfield.text!
+            self.itemArray.append(item)
+            self.saveItems()
         }
         
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
     }
+    
+    //MARK: - Load Items method
+    func loadItems() {
+        do {
+            let data = try Data.init(contentsOf: dataFilePath!)
+            let decoder = PropertyListDecoder()
+            itemArray = try decoder.decode([Item].self, from: data)
+        }
+        catch {
+            print("Error in decoding: \(error)")
+        }
+    }
+    
+    //MARK: - Save Items method
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(self.itemArray)
+            try data.write(to: self.dataFilePath!)
+        }
+        catch {
+            print("Error in encoding: \(error)")
+        }
+        tableView.reloadData()
+    }
+    
+    
     
 }
 
