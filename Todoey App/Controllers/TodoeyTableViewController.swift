@@ -10,12 +10,14 @@ import UIKit
 
 class TodoeyTableViewController: UITableViewController {
 
-    var itemArray = ["Bring 12 Eggs", "Bring 2 litres milk", "Bring one dozen bananas"]
+    var itemArray = [String]()
+    var defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         //print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true))
+        itemArray = defaults.array(forKey: "TodoeyListArray") as! [String]
     }
 
     override func didReceiveMemoryWarning() {
@@ -45,6 +47,7 @@ class TodoeyTableViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add", style: .default) { (alertAction) in
             self.itemArray.append(textfield.text!)
+            self.defaults.set(self.itemArray, forKey: "TodoeyListArray")
             self.tableView.reloadData()
         }
         
