@@ -10,8 +10,9 @@ import UIKit
 
 class TodoeyTableViewController: UITableViewController {
 
-    var itemArray = [Item]()
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+
+    var itemArray = [Item]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,12 +27,19 @@ class TodoeyTableViewController: UITableViewController {
     //MARK: - TableView Data source methods
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "labelCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row].title
+        let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        cell.accessoryType = item.done ? .checkmark : .none
         return cell
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        saveItems()
     }
 
     //MARK:- Add Button Action
