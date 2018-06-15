@@ -69,14 +69,14 @@ class TodoeyTableViewController: UITableViewController {
     }
     
     //MARK: - Load Items method
-    func loadItems() {
-        let request: NSFetchRequest = Item.fetchRequest()
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
         do{
             itemArray = try context.fetch(request)
         }
         catch {
             print("Error loading data, \(error)")
         }
+        self.tableView.reloadData()
     }
     
     //MARK: - Save Items method
@@ -87,10 +87,45 @@ class TodoeyTableViewController: UITableViewController {
         catch {
             print("Error saving data, \(error)")
         }
-        tableView.reloadData()
+        self.tableView.reloadData()
+    }
+}
+
+
+
+//MARK: - Search bar methods
+extension TodoeyTableViewController: UISearchBarDelegate {
+    
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request: NSFetchRequest = Item.fetchRequest()
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        request.predicate = predicate
+        let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+        request.sortDescriptors = [sortDescriptor]
+        loadItems(with: request)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
+        }
+//        else {
+//            let request: NSFetchRequest = Item.fetchRequest()
+//            let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+//            request.predicate = predicate
+//            let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
+//            request.sortDescriptors = [sortDescriptor]
+//            loadItems(with: request)
+//        }
     }
     
     
     
+    
+    
+    
 }
-
