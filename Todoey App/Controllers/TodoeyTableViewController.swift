@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoeyTableViewController: UITableViewController {
 
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     var itemArray = [Item]()
 
@@ -39,6 +40,9 @@ class TodoeyTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
         saveItems()
     }
 
@@ -53,8 +57,9 @@ class TodoeyTableViewController: UITableViewController {
         }
         
         let action = UIAlertAction(title: "Add", style: .default) { (alertAction) in
-            let item = Item()
+            let item = Item(context: self.context)
             item.title = textfield.text!
+            item.done = false
             self.itemArray.append(item)
             self.saveItems()
         }
@@ -65,25 +70,22 @@ class TodoeyTableViewController: UITableViewController {
     
     //MARK: - Load Items method
     func loadItems() {
-        do {
-            let data = try Data.init(contentsOf: dataFilePath!)
-            let decoder = PropertyListDecoder()
-            itemArray = try decoder.decode([Item].self, from: data)
+        let request: NSFetchRequest = Item.fetchRequest()
+        do{
+            itemArray = try context.fetch(request)
         }
         catch {
-            print("Error in decoding: \(error)")
+            print("Error loading data, \(error)")
         }
     }
     
     //MARK: - Save Items method
     func saveItems() {
-        let encoder = PropertyListEncoder()
-        do {
-            let data = try encoder.encode(self.itemArray)
-            try data.write(to: self.dataFilePath!)
+        do{
+            try context.save()
         }
         catch {
-            print("Error in encoding: \(error)")
+            print("Error saving data, \(error)")
         }
         tableView.reloadData()
     }
