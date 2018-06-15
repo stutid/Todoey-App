@@ -96,7 +96,6 @@ class TodoeyTableViewController: UITableViewController {
 //MARK: - Search bar methods
 extension TodoeyTableViewController: UISearchBarDelegate {
     
-    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         let request: NSFetchRequest = Item.fetchRequest()
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
