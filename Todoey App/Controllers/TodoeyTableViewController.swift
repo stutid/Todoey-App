@@ -14,10 +14,14 @@ class TodoeyTableViewController: UITableViewController {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     var itemArray = [Item]()
+    var selectedCategory: Category? {
+        didSet {
+            loadItems()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadItems()
     }
 
     override func didReceiveMemoryWarning() {
@@ -60,6 +64,7 @@ class TodoeyTableViewController: UITableViewController {
             let item = Item(context: self.context)
             item.title = textfield.text!
             item.done = false
+            item.parentCategory = self.selectedCategory
             self.itemArray.append(item)
             self.saveItems()
         }
@@ -69,7 +74,16 @@ class TodoeyTableViewController: UITableViewController {
     }
     
     //MARK: - Load Items method
-    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) {
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest(), with predicate: NSPredicate? = nil) {
+        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", (selectedCategory?.name)!)
+        
+        if let additionalPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additionalPredicate])
+        }
+        else{
+            request.predicate = categoryPredicate
+        }
+        
         do{
             itemArray = try context.fetch(request)
         }
@@ -99,10 +113,10 @@ extension TodoeyTableViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         let request: NSFetchRequest = Item.fetchRequest()
         let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-        request.predicate = predicate
+//        request.predicate = predicate
         let sortDescriptor = NSSortDescriptor(key: "title", ascending: true)
         request.sortDescriptors = [sortDescriptor]
-        loadItems(with: request)
+        loadItems(with: request, with: predicate)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -121,10 +135,5 @@ extension TodoeyTableViewController: UISearchBarDelegate {
 //            loadItems(with: request)
 //        }
     }
-    
-    
-    
-    
-    
     
 }

@@ -28,6 +28,11 @@ class CategoryTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categoryArray.count
     }
+    
+    //MARK: - TableView Delegate methods
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "goToItems", sender: self)
+    }
 
     //MARK: - Add button pressed method
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
@@ -69,6 +74,15 @@ class CategoryTableViewController: UITableViewController {
             print("Error loading data, \(error)")
         }
         self.tableView.reloadData()
+    }
+    
+    //MARK: - Perform segue
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destinationVC = segue.destination as? TodoeyTableViewController
+        {
+            let indexPath = tableView.indexPathForSelectedRow
+            destinationVC.selectedCategory = categoryArray[(indexPath?.row)!]
+        }
     }
     
 
